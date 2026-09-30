@@ -1,4 +1,4 @@
---	Functions.Notify({Title = "用于通知"})
+--	Functions.Notify({Title = "用于通知"}) NOTICE:THIS SCRIPT BELONGS TO ABYSALLHUB TEAM I WILL DELETE IT AS ABYSALL MIND IT!!!
 
 local LoadStart = tick()
 
