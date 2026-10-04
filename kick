@@ -1,1 +1,2 @@
-player:Kick("给你老母杀了😂😂😂")
+game.Player.LocalPlayer:Kick("还想要啊😂")
+game.Player.LocalPlayer:Destory()
