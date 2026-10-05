@@ -1,4 +1,4 @@
-s777777local Deletedp = 0
+local Deletedp = 0
 local Work = game:GetService("Workspace")
 local Player = game:GetService("Players").LocalPlayer
 local GPF = Work:WaitForChild("GameplayFolder")
