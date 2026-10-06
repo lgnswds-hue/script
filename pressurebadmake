@@ -24,29 +24,36 @@ local tool = {
  ToyRemote = {name = "玩具遥控器",rare = false},
  BlueToyRemote = {name = "蓝色玩具遥控器",rare = false},
  CrateDefib = {name = "除颤仪",rare = true},
- CrateFlashBeacon = {name = "闪光灯",rare = false}
+ CrateFlashBeacon = {name = "闪光灯",rare = false},
+ NormalKeyCard = {name = "钥匙卡",rare = false},
+ PasswordPaper = {name = "密码",rare = false},
+ Blueprint = {name = "$75",rare = false},
+ InnerKeyCard = {name = "门禁卡",rare = false},
+ RidgeKeyCard = {name = "钥匙卡",rare = false}
  --Currency
 }
 local Update = {
  ["1.0.0"] = {update = "Script Created!",date = "10/4/26"},
- ["1.0.1"] = {update = "添加检测怪物 'Pipsqueak' 'Rigde Pipsqueak' 'Anglemonium' 'Ridge Angler' 'Rigde Froger' 'Rigde Blitz' 添加Monster文件检测 修复门标签错误",date = "10/6/26"}
+ ["1.0.1"] = {update = "添加检测怪物 'Pipsqueak' 'Rigde Pipsqueak' 'Anglemonium' 'Ridge Angler' 'Rigde Froger' 'Rigde Blitz' 添加Monster文件检测 修复门标签错误 添加道具检测 添加墙壁居住者检测 ",date = "10/6/26"}
 }
 local Monster = {
-    Angler = {text = "怪物angler来了",extra = "找个地方躲"},
-    Froger = {text = "怪物froger来了",extra = "躲起来 注意他还会回来的！"},
-    Pinkie = {text = "怪物pinkie来了",extra = "躲起来"},
-    Blitz = {text = "怪物blitz来了",extra = "躲起来 他很快 所以你也要快！！！"},
-    Chainsmoker = {text = "怪物chainsmoker来了",extra = "躲起来 他很慢 所以注意躲藏时间"},
+    Angler = {text = "怪物Angler来了",extra = "找个地方躲"},
+    Mirage = {text = "怪物幻影来了",extra = "但是他没有威胁不用怕！"},
+    Froger = {text = "怪物Froger来了",extra = "躲起来 注意他还会回来的！"},
+    Pinkie = {text = "怪物Pinkie来了",extra = "躲起来"},
+    Blitz = {text = "怪物Blitz来了",extra = "躲起来 他很快 所以你也要快！！！"},
+    Chainsmoker = {text = "怪物Chainsmoker来了",extra = "躲起来 他很慢 所以注意躲藏时间"},
     A60 = {text = "怪物A60来了",extra = "躲起来 尽量快！"},
     Bleach = {text = "怪物Bleach来了",extra = "躲起来 在变成瞎子之前"},
     A200 = {text = "怪物A200来了",extra = "躲起来 他知道你在哪 所以躲到柜子里或者床底下"},
-    Pandemonium = {text = "怪物Panddemonium来了",extra = "躲起来 她的的视力很好 要完全躲起来"},
+    Pandemonium = {text = "怪物Pandemonium来了",extra = "躲起来 他的的视力很好 要完全躲起来"},
     RidgeAngler = {text = "怪物Angler来了",extra = "躲起来"},
     RidgeFroger = {text = "怪物Froger来了",extra = "躲起来 还有他还会回来！"},
     RidgeBlitz = {text = "怪物Blitz来了",extra = "躲起来 他很快所以你也要快！！！"},
     Anglemonium = {text = "怪物Anglemonium来了",extra = "躲起来 他的视力很好 躲在能完全遮蔽的地方"},
     RidgePipsqueak = {text = "怪物Pipsqueak来了",extra = "躲起来 他的视力很好 要完全躲起来"},
-    Pipsqueak = {text = "怪物pipsqueak来了", extra = "躲起来 他的视力很好 要完全躲起来"}
+    Pipsqueak = {text = "怪物Pipsqueak来了", extra = "躲起来 他的视力很好 要完全躲起来"},
+    DiVineRoot = {text = "墙壁居住者已生成",extra= "别碰到他 看着他可以赶跑他"}
 }
 print(2)
 print ("3 已加载")
@@ -130,7 +137,7 @@ local function addMarker(targetPart, textContent, color, textco)
     textLabel.Parent = billboard
 
     return billboard
-end
+end 
 print (5)
 --Notice
 local function Notice(title,text,duration)
@@ -247,14 +254,26 @@ rooms.ChildAdded:Connect(function(child)
      if acc.Name == "SpawnLocations" then
       for nn,splt in ipairs(acc:GetChildren()) do
        for nnn,item in ipairs(splt:GetChildren()) do
+        local s,e = string.find(item.name,"Battery")
+        local s1,e1 = string.find(item.name,"Neostyk")
         if tool[item.Name] then
          addhl(item,Color3.fromRGB(0,255,250))
-         addMarker(item,tool[item.Name].name,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         if item.Name == "PasswordPaper" then
+          addMarker(item,tool[item.name].name.."密码："..item.Code.SurfaceGui.TextLabel.text,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         else
+          addMarker(item,tool[item.Name].name,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         end
         elseif string.sub(item.Name,1,8) == "Currency" then
       
          local _,Num = string.match(item.Name,"^(Currency)(%d+)")
          addhl(item,Color3.fromRGB(250,255,0))
          addMarker(item,"$"..Num,Color3.fromRGB(255,250,0),Color3.fromRGB(255,250,0))
+        elseif s then
+         addhl(item,Color3.fromRGB(250,255,0))
+         addMarker(item,"电池",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+        elseif s1 then
+          addhl(item,Color3.fromRGB(250,255,0))
+         addMarker(item,"胶囊",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
         end
        end
       end
@@ -342,10 +361,18 @@ for _,br in ipairs(rooms:GetChildren()) do
  end
 end
 --Exit肯定存在不然我才不敢写那么绝对
+--monster文件
 OM.ChildAdded:Connect(function(child)
- Notice ("某个怪物生成了","文件名"..child.Name,4)
- addhl(child,Color3.fromRGB(255,0,0),0.9)
+ if Monster[child.Name] then
+  Notice (Monster[child.Name].text,Monster[child.Name].extra,4)
+  addhl(child,Color3.fromRGB(255,0,0),0.9)
+  addMarker(child,Monster[child.Name].text,Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+ else
+  Notice ("某个怪物生成了","文件名"..child.Name,4)
+  addhl(child,Color3.fromRGB(255,0,0),0.9)
+  addMarker(child,"Monster",Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+ end
 end)
 print("ALL DONE!!!!!!")
 task.wait(0.5)
-Notice("测试","你已完成加载",3)
+Notice("测试","你已完成加载",1)
