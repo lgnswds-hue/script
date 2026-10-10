@@ -1,0 +1,60 @@
+local player = game:GetService("Players").LocalPlayer
+local gui = game:GetService("CoreGui")
+local ui = Instance.new("ScreenGui")
+local text = Instance.new("TextLabel")
+local musics = Instance.new("Sound")
+local musici = Instance.new("Sound")
+local musice = Instance.new("Sound")
+local work = game:GetService("Workspace")
+ui.Parent = gui
+ui.Name = "YOUWILLGETKICK"
+musics.SoundId = "rbxassetid://89626012754712"
+musici.SoundId = "rbxassetid://112751165766729"
+musice.SoundId = "rbxassetid://137998879807346"
+musics.Parent = ui
+musici.Parent = ui
+musice.Parent = ui
+text.Parent = ui
+text.TextColor3 = Color3.fromRGB(255,0,0)
+text.TextStrokeTransparency = 0
+text.Position = UDim2.new(0.5,0,-2,0)
+text.TextSize = 50
+musics.Loaded:Connect(function()
+ print ("load")
+end)
+musics.Playing = true
+task.wait(musics.TimeLength)
+musici.Playing = true
+text.Position = UDim2.new(0.5,0,0.1,0)
+local time = work.DistributedGameTime
+while time + musici.TimeLength > work.DistributedGameTime do
+ local rt = time + musici.TimeLength - work.DistributedGameTime + musice.TimeLength
+ local t1 = tostring(rt % 60 // 1)
+ if #t1 == 1 then
+  t1 = "0"..t1
+ end
+ local t2 = tostring(rt % 1 * 1000 // 1)
+ while #t2 < 3 do
+  t2 = t2.."0"
+ end
+ task.wait(0)
+ text.Text = "YOU WILL GET KICK AT "..tostring(rt//60)..":"..t1..":"..t2
+end
+musice.Playing = true
+local time1 = work.DistributedGameTime
+while time1 + musice.TimeLength > work.DistributedGameTime do
+ local rt1 = time1 + musice.TimeLength - work.DistributedGameTime
+ local tt1 = tostring(rt1 % 60 //1)
+ local tt2 = tostring(rt1 % 1 * 1000 //1)
+ while #tt2 < 3 do
+  tt2 = tt2.."0"
+ end
+ if #tt1 == 1 then
+  tt1 = "0"..tt1
+ end
+ text.Text = "YOU WILL GET KICK AT "..tostring(rt1//60)..":"..tt1..":"..tt2
+ task.wait(0)
+end
+if false then
+ player:Kick("你的时间耗尽了👁")
+end
