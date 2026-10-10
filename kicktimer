@@ -55,6 +55,4 @@ while time1 + musice.TimeLength > work.DistributedGameTime do
  text.Text = "YOU WILL GET KICK AT "..tostring(rt1//60)..":"..tt1..":"..tt2
  task.wait(0)
 end
-if false then
- player:Kick("你的时间耗尽了👁")
-end
+player:Kick("你的时间耗尽了👁")
