@@ -1,11 +1,20 @@
 print(1)
+local killed = false
+local recordoor = 0
 local Deletedp = 0
+local Clean = false
 local Work = game:GetService("Workspace")
 local Player = game:GetService("Players").LocalPlayer
 local GPF = Work:WaitForChild("GameplayFolder")
 local rooms = GPF:FindFirstChild("Rooms")
 local OM = GPF:FindFirstChild("Monsters")
+local cha = Player.Character
+local CR = cha.HumanoidRootPart
+local dooresp = {
+}
 local checkedrooms = {
+}
+local landchecked = {
 }
 local tool = {
  Flashlight = {name = "手电筒", rare = false},
@@ -17,8 +26,9 @@ local tool = {
  Blacklight = {name = "黑光",rare = true},
  GummyLight = {name = "软糖手电筒",rare = true},
  HealthBoost = {name = "治疗针",rare = true},
+ CeateHealthBoost = {name = "治疗针",rare = true},
  Defibrillator = {name = "除颤仪",rare = true},
- Windlight = {name = "手摇手电筒",rare = true},
+ Winduplight = {name = "手摇手电筒",rare = true},
  CodeBreacher = {name = "密码破坏者",rare = false},
  FlashBeacon = {name = "闪光灯塔",rare = false},
  ToyRemote = {name = "玩具遥控器",rare = false},
@@ -26,15 +36,21 @@ local tool = {
  CrateDefib = {name = "除颤仪",rare = true},
  CrateFlashBeacon = {name = "闪光灯",rare = false},
  NormalKeyCard = {name = "钥匙卡",rare = false},
- PasswordPaper = {name = "密码",rare = false},
+ PasswordPaper = {name = "密码纸",rare = false},
  Blueprint = {name = "$75",rare = false},
  InnerKeyCard = {name = "门禁卡",rare = false},
- RidgeKeyCard = {name = "钥匙卡",rare = false}
+ RidgeKeyCard = {name = "钥匙卡",rare = false},
+ RedeemerRevolver = {name = "枪",rare = false},
+ BigFlashBeacon = {name = "闪光灯塔",rare = false},
+ CrateLantern = {name = "灯笼",rare = false},
+ CrateHealthBoost = {name = "治疗针",rare = false}
  --Currency
 }
 local Update = {
  ["1.0.0"] = {update = "Script Created!",date = "10/4/26"},
- ["1.0.1"] = {update = "添加检测怪物 'Pipsqueak' 'Rigde Pipsqueak' 'Anglemonium' 'Ridge Angler' 'Rigde Froger' 'Rigde Blitz' 添加Monster文件检测 修复门标签错误 添加道具检测 添加墙壁居住者检测 ",date = "10/6/26"}
+ ["1.0.1"] = {update = "添加检测怪物 'Pipsqueak' 'Rigde Pipsqueak' 'Anglemonium' 'Ridge Angler' 'Rigde Froger' 'Rigde Blitz' 添加Monster文件检测 修复门标签错误 添加道具检测 添加墙壁居住者检测 ",date = "10/6/26"},
+ ["1.0.2"] = {update = "修复打开脚本时下一门物品没透视 修复一些场景物品没透视 修复Sewer场景门没透视 修复特殊怪物文字显示 添加水泥鞋 鱼 专项检测 添加脚本自杀防止过多执行 添加函数esp（整合addhl 和 addMarker）添加掉落物透视",date = "10/7/26"},
+ ["1.0.3"] = {update = "更新透视可查看门数 修复开启时第二门不透视道具等 更新透视eyefestation", date = "10/10/26"}
 }
 local Monster = {
     Angler = {text = "怪物Angler来了",extra = "找个地方躲"},
@@ -53,14 +69,31 @@ local Monster = {
     Anglemonium = {text = "怪物Anglemonium来了",extra = "躲起来 他的视力很好 躲在能完全遮蔽的地方"},
     RidgePipsqueak = {text = "怪物Pipsqueak来了",extra = "躲起来 他的视力很好 要完全躲起来"},
     Pipsqueak = {text = "怪物Pipsqueak来了", extra = "躲起来 他的视力很好 要完全躲起来"},
-    DiVineRoot = {text = "墙壁居住者已生成",extra= "别碰到他 看着他可以赶跑他"}
+    DiVineRoot = {text = "墙壁居住者",extra= "别碰到他 看着他可以赶跑他 隔着墙也可以看但是赶不跑"},
+    FishHead = {text = "鱼",extra = "别碰到他"},
+    CementShoes = {text = "水泥鞋",extra = "别碰到他 看着他可以使他停止移动"}
 }
 print(2)
+--脚本自杀前置
+local H = Work:FindFirstChild("KSF")
+if not H then
+ local A = Instance.new("Folder")
+ A.Name = "KSF"
+ A.Parent = Work
+else
+ local SKS = Instance.new("StringValue")
+ SKS.Name = "NowKill"
+ SKS.Parent = H
+end
+--结束
 print ("3 已加载")
 task.wait(2)
 print ("这个脚本由一个菜鸟制作的 所以还存在很多问题")
 
 local function addhl(goal,color,hltr)
+ if killed then
+  return
+ end
  local hl = Instance.new("Highlight")
  hl.FillColor = color or Color3.fromRGB(0,255,0)
  hl.FillTransparency = hltr or 0.9
@@ -100,6 +133,9 @@ layout.Parent = holder
 local order = 0
 --标签添加
 local function addMarker(targetPart, textContent, color, textco)
+    if killed then
+     return
+    end
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "TargetMarker"
     billboard.Size = UDim2.new(0, 60, 0, 80)   
@@ -138,9 +174,124 @@ local function addMarker(targetPart, textContent, color, textco)
 
     return billboard
 end 
+local function esp(take,text,color,txcolor,tr)
+ if killed then
+  return
+ end
+ addhl(take,color,tr)
+ addMarker(take,text,color,txcolor)
+end
+--地雷等透视
+local function espland(nr)
+ if killed then
+  return
+ end
+ for c,r in ipairs(rooms:GetChildren()) do
+  if r ~= nr and not landchecked[r.Name] then
+   landchecked[r.Name] = true
+   for n,rc in ipairs(r:GetChildren()) do
+    if rc.Name == "Landmine" then
+     addhl(rc,Color3.fromRGB(255,0,0),0.9)
+     addMarker(rc,"地雷",Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+    end
+   end
+  end
+ end
+end
+--道具透视
+local function espitem(nr)
+ if killed then
+  return
+ end
+ for c,r in ipairs(rooms:GetChildren()) do
+  if r ~= nr or not Clean and not checkedrooms[r.Name] then
+   checkedrooms[r.Name] = true
+   if not Clean then
+    table.clear(checkedrooms)
+    Clean = true
+   end
+   for _,ac in ipairs(r:GetChildren()) do
+    for n,acc in ipairs(ac:GetChildren()) do
+     if acc.Name == "SpawnLocations" then
+      for nn,splt in ipairs(acc:GetChildren()) do
+       for nnn,item in ipairs(splt:GetChildren()) do
+       
+        local s,e = string.find(item.Name,"Battery")
+        local s1,e1 = string.find(item.Name,"Neostyk")
+        local sM,eM = string.find(item.Name,"Currency")
+        if tool[item.Name] then
+         addhl(item,Color3.fromRGB(0,255,250))
+         if item.Name == "PasswordPaper" then
+          addMarker(item,tool[item.Name].name.." 密码："..item.Code.SurfaceGui.TextLabel.text,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         elseif item.Name == "RedeemerRevolver" then
+          addMarker(item,tool[item.Name].name,Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+         else
+          addMarker(item,tool[item.Name].name,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         end
+        elseif sM then
+         
+         local Mode = "^(Currency)(%d+)"
+         if string.sub(item.Name,1,1) == "U" then
+          Mode = "^(UCurrency)(%d+)"
+         end
+         local _,Num = string.match(item.Name,Mode)
+         addhl(item,Color3.fromRGB(250,255,0))
+         addMarker(item,"$"..Num,Color3.fromRGB(255,250,0),Color3.fromRGB(255,250,0))
+        elseif s then
+         addhl(item,Color3.fromRGB(250,255,0))
+         addMarker(item,"电池",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+        elseif s1 then
+         addhl(item,Color3.fromRGB(250,255,0))
+         addMarker(item,"胶囊",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+        end
+       end
+      end
+     elseif acc.Name == "OneItemSpawn" then
+      for nn2,splt2 in ipairs(acc:GetChildren()) do
+       for nnn2,saw in ipairs(splt2:GetChildren()) do
+        for nnnn,item2 in ipairs(saw:GetChildren()) do 
+        
+         local st,et = string.find(item2.Name,"Battery")
+         local s1t,e1t = string.find(item2.Name,"Neostyk")
+         local s1M,e1M = string.find(item2.Name,"Currency")
+         
+         if tool[item2.Name] then
+         
+          addhl(item2,Color3.fromRGB(0,255,250))
+          addMarker(item2,tool[item2.Name].name,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         elseif s1M then
+         
+         local Mode = "^(Currency)(%d+)"
+         if string.sub(item2.Name,1,1) == "U" then
+          Mode =  "^(UCurrency)(%d+)"
+         end
+          local _,Num2 = string.match(item2.Name,"^(Currency)(%d+)")
+          addhl(item2,Color3.fromRGB(250,255,0))
+          addMarker(item2,"$"..Num2,Color3.fromRGB(255,250,0),Color3.fromRGB(255,250,0))
+         elseif st then
+         
+          addhl(item2,Color3.fromRGB(250,255,0))
+          addMarker(item2,"电池",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         elseif s1t then
+         
+          addhl(item2,Color3.fromRGB(250,255,0))
+          addMarker(item2,"胶囊",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         end
+        end
+       end
+      end
+     end
+    end
+   end
+  end
+ end
+end
 print (5)
 --Notice
 local function Notice(title,text,duration)
+    if killed then
+     return
+    end
     duration = duration or 4   
     order += 1
     local nowor = order
@@ -228,143 +379,112 @@ local function Notice(title,text,duration)
         item:Destroy()
     end)
 end
+local function espdoor(r)
+local pfld = Player:FindFirstChild("PlayerFolder")
+local datadoor = pfld:FindFirstChild("DoorsOpened")
+local opened = datadoor.Value
+ if killed then
+  return
+ end
+ local et = r:FindFirstChild("Entrances")
+ if et then 
+  for _,ep in ipairs(dooresp) do
+   ep:Destroy()
+  end
+  local etc = et:GetChildren()
+  if #etc > 0 then
+   for _,ld in ipairs(etc) do
+    if ld.Name == "NormalDoor" then
+     addhl(ld.Door,Color3.fromRGB(0,255,0))
+     local ep = addMarker(ld.Door,"门 门数："..tostring(opened + 1),Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
+     table.insert(dooresp,ep)
+    elseif ld.Name == "DoubleDoor" then
+     for _,lds in ipairs(ld:GetChildren()) do
+      if lds.Name == "NormalDoor" then
+       addhl(lds.Door,Color3.fromRGB(0,255,0))
+       local ep = addMarker(lds.Door,"门 门数："..tostring(opened + 1),Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
+       table.insert(dooresp,ep)
+      end
+     end
+    elseif ld.Name == "DoubleDoorSewer" then
+     for _,lds in ipairs(ld:GetChildren()) do
+      if lds.Name == "NormalDoor" then
+       addhl(lds.Door,Color3.fromRGB(0,255,0))
+       local ep addMarker(lds.Door,"门 门数："..tostring(opened + 1),Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
+       table.insert(dooresp,ep)
+      end
+     end
+    elseif ld.Name == "BigDoor" then
+     addhl(ld.Door,Color3.fromRGB(0,255,0))
+     local ep = addMarker(ld.Door,"门 门数："..tostring(opened + 1),Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
+     table.insert(dooresp,ep)
+    end
+   end
+  end
+ end
+end
 print (6)
 --Notice(Name,data,time)
 function SendNot(name)
+ if killed then
+  return
+ end
  local namereal = Monster[name]
  if not namereal then return end
  Notice(namereal.text,namereal.extra,4)
 end
 workspace.ChildAdded:Connect(function(child)
+ if killed then
+  return
+ end
  local cn = child.Name
  if not Monster[cn] then return end
  SendNot(cn)
  addMarker(child,child.Name,Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
 end)
 rooms.ChildAdded:Connect(function(child)
- print("new rooms !!!!!")
- task.wait(0.3)
- --物品透视
- for c,r in ipairs(rooms:GetChildren()) do
- 
-  if r ~= child and not checkedrooms[r.Name] then
-  checkedrooms[r.Name] = true
-   for _,ac in ipairs(r:GetChildren()) do
-    for n,acc in ipairs(ac:GetChildren()) do
-     if acc.Name == "SpawnLocations" then
-      for nn,splt in ipairs(acc:GetChildren()) do
-       for nnn,item in ipairs(splt:GetChildren()) do
-        local s,e = string.find(item.name,"Battery")
-        local s1,e1 = string.find(item.name,"Neostyk")
-        if tool[item.Name] then
-         addhl(item,Color3.fromRGB(0,255,250))
-         if item.Name == "PasswordPaper" then
-          addMarker(item,tool[item.name].name.."密码："..item.Code.SurfaceGui.TextLabel.text,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
-         else
-          addMarker(item,tool[item.Name].name,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
-         end
-        elseif string.sub(item.Name,1,8) == "Currency" then
-      
-         local _,Num = string.match(item.Name,"^(Currency)(%d+)")
-         addhl(item,Color3.fromRGB(250,255,0))
-         addMarker(item,"$"..Num,Color3.fromRGB(255,250,0),Color3.fromRGB(255,250,0))
-        elseif s then
-         addhl(item,Color3.fromRGB(250,255,0))
-         addMarker(item,"电池",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
-        elseif s1 then
-          addhl(item,Color3.fromRGB(250,255,0))
-         addMarker(item,"胶囊",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
-        end
-       end
-      end
-     elseif acc.Name == "OneItemSpawn" then
-      for nn2,splt2 in ipairs(acc:GetChildren()) do
-       for nnn2,saw in ipairs(splt2:GetChildren()) do
-        for nnnn,item2 in ipairs(saw:GetChildren()) do 
-         if tool[item2.Name] then
-          addhl(item2,Color3.fromRGB(0,255,250))
-          addMarker(item2,tool[item2.Name].name,Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
-         elseif string.sub(item2.Name,1,8) == "Currency" then
-         local _,Num2 = string.match(item2.Name,"^(Currency)(%d+)")
-          addhl(item2,Color3.fromRGB(250,255,0))
-          addMarker(item2,"$"..Num2,Color3.fromRGB(255,250,0),Color3.fromRGB(255,250,0))
-         end
-        end
-       end
-      end
-     end
+ if killed then
+  return
+ end
+ task.wait(0.6)
+ local idkto = child.Name
+ local sr,er = string.find(idkto,"Neon")
+ if not sr then
+  print ("newrooms?")
+ end
+ child.DescendantAdded:Connect(function(chi)
+  if chi.Name == "Eyefestation" then
+   print("查询到怪物")
+   esp(chi,"眼睛盛宴",Color3.fromRGB(0,167,97),Color3.fromRGB(0,167,97))
+   Notice("怪物 眼睛盛宴 已生成","不要看他",4)
+   local a = chi:FindFirstChild("NonAnimated")
+   local ey = a:FindFirstChild("RightEye")
+   while chi do
+    local get = ey or a.REye
+    if get.Name ~= "REye" then
+     get.Name = "REye"
+     task.wait(0)
     end
    end
+  elseif chi.Name == "Generator" or chi.Name == "PresetGenerator" then
+   esp(chi,"发电机",Color3.fromRGB(0,167,97),Color3.fromRGB(0,167,97))
   end
- end
- --门透视
- local et = child:FindFirstChild("Entrances")
- if et then 
-  local etc = et:GetChildren()
-  if #etc > 0 then
-   for _,ld in ipairs(etc) do
-    if ld.Name == "NormalDoor" then
-     addhl(ld.Door,Color3.fromRGB(0,255,0))
-     addMarker(ld.Door,"门",Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
-    elseif ld.Name == "DoubleDoor" then
-     for _,lds in ipairs(ld:GetChildren()) do
-      if lds.Name == "NormalDoor" then
-       addhl(lds.Door,Color3.fromRGB(0,255,0))
-       addMarker(lds.Door,"门",Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
-      end
-     end
-    elseif ld.Name == "BigDoor" then
-     addhl(ld.Door,Color3.fromRGB(0,255,0))
-     addMarker(ld.Door,"门",Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
-    end
-   end
-  end
- end
- --local doors = child:FindFirstChild("Exits"):GetChildren()
- --local door = doors[1]
- --addMarker(door,"门",Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
- --local dmg = child:FindFirstChild("DamageParts")
- --if dmg then
-  --print ("realpart")
-  --local dpt = dmg:GetChildren()
-  --print ("realchild")
-  --if dpt[1] then
-   --for _,dpo in ipairs(dpt) do
-    --dpo:Destroy()
-    --Deletedp += 1
-    --print("成功删除"..tostring(Deletedp).."个damageparts")
-   --end
-  --end
- --end   
+ end)
+ espitem(child)
+ espdoor(child)
 end)
 task.wait(0.5)
 for _,br in ipairs(rooms:GetChildren()) do
---addMarker(br.Exits:GetChildren()[1],"门",Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
- local let = br:FindFirstChild("Entrances")
- if let then
-  local letc = let:GetChildren()
-  if #letc > 0 then
-   for _,lld in ipairs(letc) do
-    if lld.Name == "NormalDoor" then
-     addhl(lld.Door,Color3.fromRGB(0,255,0))
-     addMarker(lld.Door,"门",Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
-    elseif lld.Name == "DoubleDoor" then
-     for _,lds in ipairs(lld:GetChildren()) do
-      if lds.Name == "NormalDoor" then
-       addhl(lds.Door,Color3.fromRGB(0,255,0))
-       addMarker(lds.Door,"门",Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
-      end
-     end
-    end
-   end
-  end
- end
+ espdoor(br)
 end
 --Exit肯定存在不然我才不敢写那么绝对
 --monster文件
 OM.ChildAdded:Connect(function(child)
+ if killed then
+  return
+ end
  if Monster[child.Name] then
-  Notice (Monster[child.Name].text,Monster[child.Name].extra,4)
+  Notice ("怪物 "..Monster[child.Name].text.." 已生成",Monster[child.Name].extra,4)
   addhl(child,Color3.fromRGB(255,0,0),0.9)
   addMarker(child,Monster[child.Name].text,Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
  else
@@ -373,6 +493,29 @@ OM.ChildAdded:Connect(function(child)
   addMarker(child,"Monster",Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
  end
 end)
+espitem()
+GPF.DroppedItems.ChildAdded:Connect(function(child)
+ if killed then
+  return
+ end
+ local s,e = string.find(child.Name,"Battery")
+ local s1,e1 = string.find(child.Name,"Neostyk")
+ local icn = child.Name
+ local nicn = string.gsub(icn,"Drop","")
+ if tool[nicn] then
+  esp(child,tool[nicn].name,Color3.fromRGB(255,165,0),Color3.fromRGB(255,165,0),0.9)
+ elseif s then
+  esp(child,"电池",Color3.fromRGB(255,165,0),Color3.fromRGB(255,165,0),0.9)
+ elseif s1 then
+  esp(child,"胶囊",Color3.fromRGB(255,165,0),Color3.fromRGB(255,165,0),0.9)
+ end
+end)
 print("ALL DONE!!!!!!")
 task.wait(0.5)
-Notice("测试","你已完成加载",1)
+Notice("测试","你已完成加载",5)
+--脚本自杀后置
+local EndScript = Work.KSF:WaitForChild("NowKill")
+Notice("脚本已自杀","成功自杀",4)
+killed = true
+EndScript:Destroy()
+return
