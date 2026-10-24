@@ -1,0 +1,28 @@
+local work = game:GetService("Workspace")
+local enfold = work:WaitForChild("LocalEntities")
+local hl = function(target,name,color)
+ local hl = Instance.new("Highlight")
+ hl.Parent = target
+ hl.FillColor = color
+end
+enfold.ChildAdded:Connect(function(child)
+ hl(child,child.Name,Color3.fromRGB(255,0,0))
+end)
+work.DescendantAdded:Connect(function(thing)
+ if thing:IsA("ProximityPrompt") then
+  thing.HoldDuration = 0
+ elseif thing.Parent then
+  if thing.Parent.Name == "SupplyCache" then
+   hl(thing,child.Name,Color3.fromRGB(0,255,0))
+  end
+ end
+end)
+local check = function()
+ for _,part in ipairs(work:GetDescendants()) do
+  if part:IsA("ProximityPrompt") then
+   part.HoldDuration = 0
+  end
+ end
+end
+check()
+print ("woking")
