@@ -1,28 +1,293 @@
 local work = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 local enfold = work:WaitForChild("LocalEntities")
+local TweenService = game:GetService("TweenService")
+local PlayerGui = player:WaitForChild("PlayerGui")
+local died = false
+local ESP = {
+  Monster = {
+    
+  },
+  Box = {
+    
+  }
+}
+local ESPt = {
+  monster = false,
+  Box = false
+}
+local inserth = false
+local inserthed = {
+  
+}
+local monsternotice = false
+
+local screen = Instance.new("ScreenGui")
+screen.Name = "MonsterNotice"
+screen.ResetOnSpawn = false          
+screen.IgnoreGuiInset = true
+screen.Parent = PlayerGui
+local holder = Instance.new("Frame")
+holder.Name = "Holder"
+holder.AnchorPoint = Vector2.new(1, 1)
+holder.Position = UDim2.new(1, -20, 1, -20)   
+holder.Size = UDim2.new(0, 340, 1, -40)
+holder.BackgroundTransparency = 1
+holder.Parent = screen
+local layout = Instance.new("UIListLayout")
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 8)
+layout.Parent = holder
+local order = 0
+local ray = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
+local function addMarker(targetPart, textContent, color, textco)
+    if died then return end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "TargetMarker"
+    billboard.Size = UDim2.new(0, 60, 0, 80)   
+    billboard.StudsOffset = Vector3.new(0, 2, 0) 
+    billboard.AlwaysOnTop = true               
+    billboard.LightInfluence = 0               
+    billboard.Adornee = targetPart    
+    billboard.MaxDistance = 500               
+    billboard.Parent = targetPart   
+                
+    local circle = Instance.new("Frame")
+    circle.Name = "Circle"
+    circle.Size = UDim2.new(0, 25, 0, 20)       
+    circle.Position = UDim2.new(0.5, -12.5, 0, 0) 
+    circle.BackgroundColor3 = color or Color3.fromRGB(255,255,0)
+    circle.BorderSizePixel = 1
+    circle.ZIndex = 2 
+    circle.Parent = billboard
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1,0)
+    corner.Parent = circle
+
+   
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Name = "Label"
+    textLabel.Size = UDim2.new(1, 0, 0, 20)     
+    textLabel.Position = UDim2.new(0, 0, 0, 35) 
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = textContent or "目标"
+    textLabel.TextColor3 = textco or Color3.fromRGB(255, 255, 255)
+    textLabel.TextStrokeTransparency = 0        
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.TextSize = 14
+    textLabel.TextXAlignment = Enum.TextXAlignment.Center
+    textLabel.Parent = billboard
+
+    return billboard
+end 
 local hl = function(target,name,color)
- local hl = Instance.new("Highlight")
- hl.Parent = target
- hl.FillColor = color
+ local ihl = Instance.new("Highlight")
+ ihl.Parent = target
+ ihl.FillColor = color
+ addMarker(target,name,color,color)
+ return ihl
 end
-enfold.ChildAdded:Connect(function(child)
- hl(child,child.Name,Color3.fromRGB(255,0,0))
-end)
-work.DescendantAdded:Connect(function(thing)
- if thing:IsA("ProximityPrompt") then
-  thing.HoldDuration = 0
- elseif thing.Parent then
-  if thing.Parent.Name == "SupplyCache" then
-   hl(thing,child.Name,Color3.fromRGB(0,255,0))
-  end
- end
-end)
+local function Notice(title,text,duration)
+    if died then
+     return
+    end
+    duration = duration or 4   
+    order += 1
+    local nowor = order
+    task.spawn(function()      
+        local item = Instance.new("Frame")
+        item.Name = "Item"
+        item.Size = UDim2.new(0, 320, 0, 74)
+        item.BackgroundTransparency = 1
+        item.LayoutOrder = nowor
+        item.Parent = holder
+
+        
+        local card = Instance.new("Frame")
+        card.Name = "Card"
+        card.Size = UDim2.new(1, 0, 1, 0)
+        card.Position = UDim2.new(1, 30, 0, 0)   
+        card.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+        card.BackgroundTransparency = 0.15
+        card.BorderSizePixel = 0
+        card.Parent = item
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = card
+
+        
+        local bar = Instance.new("Frame")
+        bar.Size = UDim2.new(0, 4, 1, -12)
+        bar.Position = UDim2.new(0, 6, 0, 6)
+        bar.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+        bar.BorderSizePixel = 0
+        bar.Parent = card
+
+        local barCorner = Instance.new("UICorner")
+        barCorner.CornerRadius = UDim.new(1, 0)
+        barCorner.Parent = bar
+
+        
+        local titleLabel = Instance.new("TextLabel")
+        titleLabel.Size = UDim2.new(1, -24, 0, 28)
+        titleLabel.Position = UDim2.new(0, 16, 0, 8)
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
+        titleLabel.Font = Enum.Font.GothamBold
+        titleLabel.TextSize = 17
+        titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        titleLabel.Text = title
+        titleLabel.Parent = card
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, -24, 0, 30)
+        textLabel.Position = UDim2.new(0, 16, 0, 36)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(225, 225, 230)
+        textLabel.Font = Enum.Font.Gotham
+        textLabel.TextSize = 13
+        textLabel.TextWrapped = true
+        textLabel.TextXAlignment = Enum.TextXAlignment.Left
+        textLabel.TextYAlignment = Enum.TextYAlignment.Top
+        textLabel.Text = text
+        textLabel.Parent = card
+
+        
+        local slideIn = TweenService:Create(
+            card,
+            TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+            { Position = UDim2.new(0, 0, 0, 0) }
+        )
+        slideIn:Play()
+        slideIn.Completed:Wait()
+
+        
+        task.wait(duration)
+
+        
+        local slideOut = TweenService:Create(
+            card,
+            TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+            { Position = UDim2.new(1, 30, 0, 0) }
+        )
+        slideOut:Play()
+        slideOut.Completed:Wait()
+
+        
+        item:Destroy()
+    end)
+end
 local check = function()
  for _,part in ipairs(work:GetDescendants()) do
   if part:IsA("ProximityPrompt") then
-   part.HoldDuration = 0
+   if inserth then
+    
+    table.insert(inserthed,part)
+    part.HoldDuration = 0
+   end
   end
  end
 end
+local window = ray:CreateWindow({
+    name = "90prime",
+    subtitle = "正在加载..",
+    sidebarLayout = true,
+    theme = "cobalt",
+    showName = "菜单",
+    configuration = {
+      autoSave = true,
+      autoLoad = true,
+      fileName = "90prime_convoy"
+    },
+})
+local ESPw = window:CreateTab({
+    name = "透视",
+    icon = 4483362458
+})
+ESPw:CreateToggle({
+    name = "怪物透视",
+    currentValue = false,
+    flag = "monsteresp",
+    callback = function(Value)
+     ESPt["monster"] = Value
+     for _,hl in ipairs(ESP.Monster) do
+      hl.Enabled = Value
+     end
+    end
+})
+ESPw:CreateToggle({
+    name = "补给箱透视",
+    currentValue = false,
+    flag = "itemboxesp",
+    callback = function(Value)
+     ESPt["Box"] = Value
+     for _,hl in ipairs(ESP.Box) do
+      hl.Enabled = Value
+     end
+    end
+})
+local Not = window:CreateTab({
+    name = "提示",
+    icon = 4483362458
+})
+Not:CreateToggle({
+    name = "怪物出现提示",
+    currentValue = false,
+    flag = "monsternotice",
+    callback = function(Value)
+     monsternotice = Value
+    end
+})
+local pe = window:CreateTab({
+    name = "玩家",
+    icon = 4483362458
+})
+pe:CreateToggle({
+    name = "瞬间互动",
+    currentValue = false,
+    flag = "insertance",
+    callback = function(Value)
+     inserth = Value
+     for _,hl in ipairs(inserthed) do
+      hl.HoldDuration = Value and 0 or 2
+     end
+     check()
+    end
+})
+enfold.ChildAdded:Connect(function(child)
+ if monsternotice then
+  Notice("怪物"..child.Name.."出现了","不知道",4)
+ end
+ local M = hl(child,child.Name,Color3.fromRGB(255,0,0))
+ local aM = addMarker(child,child.Name,Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+ table.insert(ESP.Monster,M)
+ table.insert(ESP.Monster,aM)
+ aM.Enabled = ESPt.monster
+ M.Enabled = ESPt.monster
+end)
+work.DescendantAdded:Connect(function(thing)
+ if thing:IsA("ProximityPrompt") then
+  if inserth then
+  
+   table.insert(inserthed,thing)
+   thing.HoldDuration = 0
+  end
+ elseif thing.Parent then
+  if thing.Parent.Name == "SupplyCache" then
+   local a = hl(thing,thing.Name,Color3.fromRGB(0,255,0))
+   local aa = addMarker(thing,"补给箱",Color3.fromRGB(0,255,0),Color3.fromRGB(0,255,0))
+   table.insert(ESP.Box,a)
+   table.insert(ESP.Box,aa)
+   aa.Enabled = ESPt.Box
+   a.Enabled = ESPt.Box
+  end
+ end
+end)
 check()
 print ("woking")
