@@ -1,0 +1,608 @@
+--locals___script_made_by_90prime_it's_free!!!--
+--由90prime制作完全免费允许搬运源码但禁止恶意修改或倒卖脚本--
+print ("script starts loading")
+local updaterecord = {
+    ["1.0.0"] = {text = "90prime_Pressure script had remaked! Thanks to RayField's ui!!!!",date = "10/30/26"},
+    ["1.0.1"] = {text = "add door,item,currency,monster ESP fix some bugs",date = "10/31/26"},
+    ["1.1.0"] = {text = "add MonsterNotice fix speicalMonster notice error add debugmode for check some where add remove damagepart fix door esp error",date = "10/31/26"},
+}
+local someupdategonnadoit = "turrents,lockers,voidlocker esp and nextroom name and show the situation of door locked or not and player speed and player unlock jump this just a funset no any useful situation"
+local died = false
+local work = game:GetService("Workspace")
+local players = game:GetService("Players")
+local cui = game:GetService("CoreGui")
+local player = players.LocalPlayer
+local GPF = work:WaitForChild("GameplayFolder")
+local OM = GPF:WaitForChild("Monsters")
+local DI = GPF:WaitForChild("DroppedItems")
+local newroom = nil 
+local ESPt = {
+    item = false,
+    door = false,
+    player = false,
+    currency = false,
+    locker = false,
+    monster = false,
+    isit = false,
+    removedp = false,
+    removeeye = false,
+    debugmode = false
+}--这个直接变成按钮数据中心了。
+local ESPa = {
+    monster = {
+
+    },
+    cur = {
+    
+    },
+    item = {
+    
+    },
+    doors = {
+    
+    },
+    isited = {
+
+    }
+}--这个也差不多。
+local dmapa = {
+ DamagePart = true,
+ Fire = true,
+ FirewallPit = true,
+ Steam = true,
+ Pit = true,
+ Electricity = true
+}
+local tool = {
+ Flashlight = {name = "手电筒", rare = false},
+ Lantern = {name = "灯笼",rare = false},
+ Medkit = {name = "医疗包",rare = false},
+ Neostyle = {name = "回血胶囊",rare = false},
+ Battery = {name = "电池", rare = false},
+ SPRINT = {name = "肾上腺素",rare = false},
+ Blacklight = {name = "黑光",rare = true},
+ GummyLight = {name = "软糖手电筒",rare = true},
+ HealthBoost = {name = "治疗针",rare = true},
+ CeateHealthBoost = {name = "治疗针",rare = true},
+ Defibrillator = {name = "除颤仪",rare = true},
+ WindupLight = {name = "手摇手电筒",rare = true},
+ CodeBreacher = {name = "密码破坏者",rare = false},
+ FlashBeacon = {name = "闪光灯塔",rare = false},
+ ToyRemote = {name = "玩具遥控器",rare = false},
+ BlueToyRemote = {name = "蓝色玩具遥控器",rare = false},
+ NormalKeyCard = {name = "钥匙卡",rare = false},
+ PasswordPaper = {name = "密码",rare = false},
+ Blueprint = {name = "$75",rare = false},
+ InnerKeyCard = {name = "门禁卡",rare = false},
+ RidgeKeyCard = {name = "钥匙卡",rare = false},
+ RedeemerRevolver = {name = "枪",rare = false},
+ Defib = {name = "除颤仪",rare = true},
+}
+local Monster = {
+    Angler = {text = "怪物Angler来了",extra = "找个地方躲"},
+    Mirage = {text = "怪物幻影来了",extra = "但是他没有威胁不用怕！"},
+    Froger = {text = "怪物Froger来了",extra = "躲起来 注意他还会回来的！"},
+    Pinkie = {text = "怪物Pinkie来了",extra = "躲起来"},
+    RidgePinkie = {text = "怪物Pinkie来了",extra = "躲起来"},
+    Blitz = {text = "怪物Blitz来了",extra = "躲起来 他很快 所以你也要快！！！"},
+    Chainsmoker = {text = "怪物Chainsmoker来了",extra = "躲起来 他很慢 所以注意躲藏时间"},
+    A60 = {text = "怪物A60来了",extra = "躲起来 尽量快！"},
+    Bleach = {text = "怪物Bleach来了",extra = "躲起来 在变成瞎子之前"},
+    A200 = {text = "怪物A200来了",extra = "躲起来 他知道你在哪 所以躲到柜子里或者床底下"},
+    Pandemonium = {text = "怪物Pandemonium来了",extra = "躲起来 他的的视力很好 要完全躲起来"},
+    RidgeAngler = {text = "怪物Angler来了",extra = "躲起来"},
+    RidgeFroger = {text = "怪物Froger来了",extra = "躲起来 还有他还会回来！"},
+    RidgeBlitz = {text = "怪物Blitz来了",extra = "躲起来 他很快所以你也要快！！！"},
+    Anglemonium = {text = "怪物Anglemonium来了",extra = "躲起来 他的视力很好 躲在能完全遮蔽的地方"},
+    RidgePipsqueak = {text = "怪物Pipsqueak来了",extra = "躲起来 他的视力很好 要完全躲起来"},
+    Pipsqueak = {text = "怪物Pipsqueak来了", extra = "躲起来 他的视力很好 要完全躲起来"},
+    DiVineRoot = {text = "墙壁居住者",extra= "别碰到他 看着他可以赶跑他 隔着墙也可以看但是赶不跑"},
+    FishHead = {text = "鱼",extra = "别碰到他"},
+    CementShoes = {text = "水泥鞋",extra = "别碰到他 看着他可以使他停止移动"},
+    StatueRoot = {text = "石像",extra = "带有光源的时候别碰他 使用光源照射他可以使他停止但是别太久 不然他会愤怒"},
+    Pinkimonium = {text = "怪物Pinkimonim来了",extra = "躲起来 他的视力很好 要完全躲起来"},
+    Frogermonium = {text = "怪物Frogermoinum来了",extra = "躲起来 他的视力很好 要完全躲起来"},
+    Pandesmoker = {text = "怪物Pandesmoker来了",extra = "躲起来 他的视力很好 要完全躲起来"},
+    Blitzemonium = {text = "怪物Blitzemonum来了",extra = "躲起来 他的视力很好 要完全躲起来"}
+}
+print("成功创建变量")
+--killingself--
+local killfold = work:WaitForChild("KSKBL",1)
+if killfold then
+ local notmatter = Instance.new("Frame")
+ notmatter.Parent = killfold
+ notmatter.Name = "killdone"
+else
+ local folderdamn = Instance.new("Folder")
+ folderdamn.Name = "KSKBL"
+ folderdamn.Parent = work
+end
+print("KILLing已度过")
+--somefunctiions--
+
+
+local TweenService = game:GetService("TweenService")
+local PlayerGui = player:WaitForChild("PlayerGui")
+local screen = Instance.new("ScreenGui")
+screen.Name = "MonsterNotice"
+screen.ResetOnSpawn = false          
+screen.IgnoreGuiInset = true
+screen.Parent = PlayerGui
+local holder = Instance.new("Frame")
+holder.Name = "Holder"
+holder.AnchorPoint = Vector2.new(1, 1)
+holder.Position = UDim2.new(1, -20, 1, -20)   
+holder.Size = UDim2.new(0, 340, 1, -40)
+holder.BackgroundTransparency = 1
+holder.Parent = screen
+local layout = Instance.new("UIListLayout")
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 8)
+layout.Parent = holder
+local order = 0
+
+
+local function addMarker(targetPart, textContent, color, textco)
+    if died then return end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "TargetMarker"
+    billboard.Size = UDim2.new(0, 60, 0, 80)   
+    billboard.StudsOffset = Vector3.new(0, 2, 0) 
+    billboard.AlwaysOnTop = true               
+    billboard.LightInfluence = 0               
+    billboard.Adornee = targetPart    
+    billboard.MaxDistance = 500               
+    billboard.Parent = targetPart   
+                
+    local circle = Instance.new("Frame")
+    circle.Name = "Circle"
+    circle.Size = UDim2.new(0, 25, 0, 20)       
+    circle.Position = UDim2.new(0.5, -12.5, 0, 0) 
+    circle.BackgroundColor3 = color or Color3.fromRGB(255,255,0)
+    circle.BorderSizePixel = 1
+    circle.ZIndex = 2 
+    circle.Parent = billboard
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1,0)
+    corner.Parent = circle
+
+   
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Name = "Label"
+    textLabel.Size = UDim2.new(1, 0, 0, 20)     
+    textLabel.Position = UDim2.new(0, 0, 0, 35) 
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = textContent or "目标"
+    textLabel.TextColor3 = textco or Color3.fromRGB(255, 255, 255)
+    textLabel.TextStrokeTransparency = 0        
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.TextSize = 14
+    textLabel.TextXAlignment = Enum.TextXAlignment.Center
+    textLabel.Parent = billboard
+
+    return billboard
+end 
+
+
+local function addhl(goal,color,hltr)
+ if died then return end
+ local hl = Instance.new("Highlight")
+ hl.FillColor = color or Color3.fromRGB(0,255,0)
+ hl.FillTransparency = hltr or 0.9
+ hl.Parent = goal
+ return hl
+end
+
+
+local function esp(take,text,color,txcolor,tr)
+ if died then return end
+ local b = addhl(take,color,tr)
+ local b1 = addMarker(take,text,color,txcolor)
+ return{b,b1}
+end
+
+
+local ray = loadstring(game:HttpGet("https://sirius.menu/gen2"))()
+--UI--
+local function Notice(title,text,duration)
+    if died then
+     return
+    end
+    duration = duration or 4   
+    order += 1
+    local nowor = order
+    task.spawn(function()      
+        local item = Instance.new("Frame")
+        item.Name = "Item"
+        item.Size = UDim2.new(0, 320, 0, 74)
+        item.BackgroundTransparency = 1
+        item.LayoutOrder = nowor
+        item.Parent = holder
+
+        
+        local card = Instance.new("Frame")
+        card.Name = "Card"
+        card.Size = UDim2.new(1, 0, 1, 0)
+        card.Position = UDim2.new(1, 30, 0, 0)   
+        card.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+        card.BackgroundTransparency = 0.15
+        card.BorderSizePixel = 0
+        card.Parent = item
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = card
+
+        
+        local bar = Instance.new("Frame")
+        bar.Size = UDim2.new(0, 4, 1, -12)
+        bar.Position = UDim2.new(0, 6, 0, 6)
+        bar.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+        bar.BorderSizePixel = 0
+        bar.Parent = card
+
+        local barCorner = Instance.new("UICorner")
+        barCorner.CornerRadius = UDim.new(1, 0)
+        barCorner.Parent = bar
+
+        
+        local titleLabel = Instance.new("TextLabel")
+        titleLabel.Size = UDim2.new(1, -24, 0, 28)
+        titleLabel.Position = UDim2.new(0, 16, 0, 8)
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
+        titleLabel.Font = Enum.Font.GothamBold
+        titleLabel.TextSize = 17
+        titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        titleLabel.Text = title
+        titleLabel.Parent = card
+
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, -24, 0, 30)
+        textLabel.Position = UDim2.new(0, 16, 0, 36)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextColor3 = Color3.fromRGB(225, 225, 230)
+        textLabel.Font = Enum.Font.Gotham
+        textLabel.TextSize = 13
+        textLabel.TextWrapped = true
+        textLabel.TextXAlignment = Enum.TextXAlignment.Left
+        textLabel.TextYAlignment = Enum.TextYAlignment.Top
+        textLabel.Text = text
+        textLabel.Parent = card
+
+        
+        local slideIn = TweenService:Create(
+            card,
+            TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+            { Position = UDim2.new(0, 0, 0, 0) }
+        )
+        slideIn:Play()
+        slideIn.Completed:Wait()
+
+        
+        task.wait(duration)
+
+        
+        local slideOut = TweenService:Create(
+            card,
+            TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+            { Position = UDim2.new(1, 30, 0, 0) }
+        )
+        slideOut:Play()
+        slideOut.Completed:Wait()
+
+        
+        item:Destroy()
+    end)
+end
+
+local function addesp (kd)
+ if died then return end
+ if Monster[kd.Name] then
+  local aaa = addMarker(kd,kd.Name,Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+  table.insert(ESPa.monster,aaa)
+  if not ESPt.monster then aaa.Enabled = false end
+ end
+end
+
+local function check(target)
+ if died then return end
+ if target then
+  --判断and locals--
+  local toolname = false
+  local toolbackname = ""
+  for name,part in pairs(tool) do
+   if string.find(target.Name,name) then
+    toolname = true
+    toolbackname = name
+   end
+  end
+  local mode = "^(Currency)(%d+)"
+  if string.find(target.Name,"U") then
+   mode = "^(UCurrency)(%d+)"
+  end
+  local drop = false
+  if target.Parent then
+   if target.Parent == DI then
+    drop = true
+   end
+  end
+  local neo = "Neostyk"
+  if drop then
+   neo = "NeoStyk"
+  end
+  local cur = string.match(target.Name,"Currency")
+  local _,num = string.match(target.Name,mode)
+  local sb,eb = string.find(target.Name,"Battery")
+  local sn,en = string.find(target.Name,neo)
+  --end--
+  if cur then
+  
+   local ba = addMarker(target,"$"..num,Color3.fromRGB(255,250,0),Color3.fromRGB(255,250,0))
+   table.insert(ESPa.cur,ba)
+   if not ESPt.currency then ba.Enabled = false end
+  elseif toolname then
+  
+   local endba = nil
+   if target.Name == "PasswordPaper" then
+    local ba = addMarker(target,"密码纸 密码："..target:WaitForChild("Code").SurfaceGui.TextLabel.text,Color3.fromRGB(128,0,128),Color3.fromRGB(128,0,128))
+    endba = ba
+   elseif target.Name == "RedeemerRevolver" then
+   
+    local ba = addMarker(target,"枪",Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+    endba = ba
+   else
+    local ba = addMarker(target,tool[toolbackname].name,drop and Color3.fromRGB(255,165,0) or tool[toolbackname].rare and Color3.fromRGB(128,0,128) or Color3.fromRGB(0,255,255),drop and Color3.fromRGB(255,165,0) or tool[toolbackname].rare and Color3.fromRGB(128,0,128) or Color3.fromRGB(0,255,255))
+    endba = ba
+   end
+   table.insert(ESPa.item,endba)
+   if not ESPt.item then endba.Enabled = false end
+  elseif sb or sn then
+  
+   local endba = nil
+   if sb then
+    local ba = addMarker(target,"电池",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+    endba = ba
+   else
+    local ba = addMarker(target,"胶囊",Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+    endba = ba
+   end
+   table.insert(ESPa.item,endba)
+   if not ESPt.item then endba.Enabled = false end
+  elseif target:IsA("ProximityPrompt") then
+   if ESPt.isit then
+    target.HoldDuration = 0
+   end
+   table.insert(ESPa.isited,target)
+  elseif dmapa[target.Name] then
+   
+    target:Destroy()
+    if debugmode then print ("已删除一个damagepart") end
+  elseif target.Name == "NormalDoor" or target.Name == "BigDoor" then
+    if debugmode then print ("opened a door") end
+    local pd = target.Parent
+    local pdp = target.Parent
+    if pdp then pdp = pdp.Parent end
+    local catch = nil
+    local catch2 = nil
+    if pd or pdp then
+     if pd.Name == "Entrances" or pdp.Name == "Entrances" and not target:IsA("Folder") then
+      for _,hl in ipairs(ESPa.doors) do
+       hl:Destroy()
+      end
+      wait(0.3)
+      local pf = player:FindFirstChild("PlayerFolder")
+      local openedthing = pf:FindFirstChild("DoorsOpened")
+      local opened = openedthing.Value
+      if target.Name == "NormalDoor" or target.Name == "BigDoor" then
+       local ba = addMarker(target,"门 门数: "..tostring(opened + 1),Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+       local ba2 = addhl(target,Color3.fromRGB(0,110,255))
+       catch = ba
+       catch2 = ba2
+       if catch then
+        table.insert(ESPa.doors,catch)
+        table.insert(ESPa.doors,catch2)
+        if not ESPt.door then catch.Enabled = false end
+        if not ESPt.door then catch2.Enabled = false end
+       end
+      elseif target.Name == "DoubleDoor" or target.Name == "DoubleDoorSewer" then
+       catch = {}
+       catch22 = {}
+       for _,tg in ipairs(target:GetChildren()) do
+        if tg.Name == "NormalDoor" then
+         local ba = addMarker(tg,"门 门数: "..tostring(opened + 1),Color3.fromRGB(0,255,250),Color3.fromRGB(0,255,250))
+         local ba2 = addhl(tg,Color3.fromRGB(0,110,255))
+         table.insert(catch,ba)
+         table.insert(catch2,ba2)
+        end
+       end
+       if #catch >= 0 then
+        for _,hl in ipairs(catch) do
+         table.insert(ESPa.doors,hl)
+         if not ESPt.door then hl.Enabled = false end
+        end
+       end
+       if #catch2 >= 0 then
+        for _,hl in ipairs(catch2) do
+         table.insert(ESPa.doors,hl)
+         if not ESPt.door then hl.Enabled = false end
+        end
+       end
+      end
+     end
+    end
+  end
+ end
+end
+
+local window = ray:CreateWindow({
+    name = "90prime_pressure",
+    subtitle = "基础脚本",
+    sidebarLayout = true,
+    theme = "cobalt",
+    showName = "菜单",
+    configuration = {
+      autoSave = false,
+      autoLoad = false,
+      fileName = "Pressure_90prime"
+    }
+})
+--ESP--
+local ESP = window:CreateTab({
+      name = "透视",
+      icon = 4483362458
+})
+ESP:CreateToggle({
+    name = "Monster",
+    currentValue = false,
+    flag = "monsteresp",
+    callback = function(Value)
+     ESPt["monster"] = Value
+     for _,hl in ipairs(ESPa.monster) do
+      if hl then
+       hl.Enabled = Value
+      end
+     end
+    end
+})
+ESP:CreateToggle({
+    name = "Item",
+    currentValue = false,
+    flag = "itemesp",
+    callback = function(Value)
+     ESPt["item"] = Value
+     for _,hl in ipairs(ESPa.item) do
+      if hl then
+       hl.Enabled = Value
+      end
+     end
+    end
+})
+ESP:CreateToggle({
+    name = "Currency",
+    currentValue = false,
+    flag = "currency",
+    callback = function(Value)
+     ESPt["currency"] = Value
+     for _,hl in ipairs(ESPa.cur) do
+      if hl then
+       hl.Enabled = Value
+      end
+     end
+    end
+})
+ESP:CreateToggle({
+    name = "Doors",
+    currentValue = false,
+    flag = "doors",
+    callback = function(Value)
+     ESPt["door"] = Value
+     for _,hl in ipairs(ESPa.doors) do
+      if hl then
+       hl.Enabled = Value
+      end
+     end
+    end
+})
+--ESPend--
+--player--
+local pset = window:CreateTab({
+    name = "玩家",
+    icon = 4483362458
+})
+pset:CreateToggle({
+    name = "瞬间互动",
+    currentValue = false,
+    flag = "isit",
+    callback = function(Value)
+     ESPt.isit = Value
+     for _,ited in ipairs(ESPa.isited) do
+      if ited then
+       ited.HoldDuration = Value and 0 or 1
+      end
+     end
+    end
+})
+--playerend--
+--remove--
+local remove = window:CreateTab({
+    name = "删除",
+    icon = 4483362458
+})
+remove:CreateToggle({
+    name = "删除伤害物体",
+    currentValue = false,
+    flag = "removedp",
+    callback = function(Value)
+     ESPt.removedp = Value
+    end
+})
+--removeend--
+--test--
+local test = window:CreateTab({
+    name = "测试",
+    icon = 4483362458
+})
+test:CreateToggle({
+    name = "debug",
+    currentValue = false,
+    flag = "debug",
+    callback = function(Value)
+     ESPt.debugmode = Value
+    end
+})
+--testend--
+print("UI已成功建造")
+--reallyworkingplace--
+DI.ChildAdded:Connect(function(a)
+ check(a)
+end)
+
+work.ChildAdded:Connect(function(a)
+ if a then
+  if Monster[a.Name] then
+   Notice(Monster[a.Name].text,Monster[a.Name].extra,4)
+  end
+  addesp(a)
+ end
+end)
+
+GPF.DescendantAdded:Connect(function(a)
+ check(a)
+end)
+
+OM.ChildAdded:Connect(function(child)
+ if Monster[child.Name] then
+  Notice("怪物"..Monster[child.Name].text.."已生成",Monster[child.Name].extra,4)
+  local espv = esp(child,Monster[child.Name].text,Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+  for _,thing in ipairs(espv) do
+   table.insert(ESPa.monster,thing)
+   if not ESPt.monster then thing.Enabled = false end
+  end
+ else
+  Notice("未知怪物"..child.Name.."已生成","先按照已知情况躲避 将未检测的怪物告诉脚本制作者",4)
+  esp(child,child.Name,Color3.fromRGB(255,0,0),Color3.fromRGB(255,0,0))
+ end
+end) --OM里是一种怪物 workspace里的是冲刺怪--
+
+for _,pt in ipairs(GPF:GetDescendants()) do
+ check(pt)
+end
+--specialworkingplace--
+if player.Name == "dizhongzhidi2" then
+ Notice("检测到扫福瑞","原来是DZD呀我直接给你老冯草司",4)
+end
+--idk--
+print("成功运行！")
+--killself--
+local wait0 = work:WaitForChild("KSKBL")--这条也一样
+local wait1 = wait0:WaitForChild("killdone")--我求你别管了这条本身就是得这样
+died = true
+return
+--🧊🧊🧊香香的口味😏你尝过没😋 🧐 😖 🤢 😵 🧟‍♂️--
+--🔥🔥🔥🔥dzdisgray🗣🗣🗣🗣🗣🗣💔💔💔💔--
+--『茈』发动前的41秒内，新宿再次响起了五条悟的吟唱，『九纲』『偏光』『乌与声明』『表里之间』。此刻『苍』『赫』在宿傩眼前完成了交叠，宿傩明白自己再也没有任何机会阻止『茈』的诞生了。无限制的『虚式』如同核爆一般在新宿亮起冲天的光芒，象征着人类文明的摩天大楼成片成片消失，废墟之中拼尽全力护住自己的宿傩无力的靠着残破的建筑上支撑身体，在反转术式的治疗下，五条悟的身体再次恢复。虎杖呆呆的看着屏幕仍不可置信，也就是说没错是五条悟赢了。--
